@@ -1,0 +1,578 @@
+{
+  "name": "Triagem Inteligente de Atendimentos",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "a50d8662-48fe-4a0c-8db7-c1318eeaa3eb",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "906f9a66-4cd2-46f8-95c1-2aa28687e454",
+      "name": "Receber Atendimento",
+      "webhookId": "a50d8662-48fe-4a0c-8db7-c1318eeaa3eb"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "65030f1f-b5fe-4aa4-9e73-08718b1ad179",
+              "name": "mensagem",
+              "value": "={{ $json.body.mensagem }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "4b5b3636-643b-419a-91f3-8f846db49ea4",
+      "name": "Extrair Mensagem"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.mensagem }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Você é um agente de triagem inteligente responsável por analisar mensagens recebidas de clientes e classificá-las para automatizar o encaminhamento interno da empresa.\n\nSeu objetivo é transformar cada mensagem em informações estruturadas e úteis para que outros sistemas possam tomar decisões automaticamente.\n\nAnalise SOMENTE as informações presentes na mensagem recebida. Não invente fatos, dados ou ações que não estejam suficientemente fundamentados.\n\n## 1. CATEGORIA\n\nClassifique a mensagem em UMA das seguintes categorias:\n\n- financeiro: cobranças, pagamentos, faturas, valores cobrados, reembolsos, estornos ou problemas relacionados a transações financeiras.\n- suporte: problemas técnicos, erros, falhas, dificuldades para utilizar o produto ou serviço ou solicitações de ajuda técnica.\n- comercial: interesse em comprar, contratar, solicitar orçamento, conhecer preços ou obter informações antes de uma compra.\n- reclamação: insatisfação, crítica ou experiência negativa que não se encaixe claramente nas categorias financeiro, suporte ou comercial.\n- outros: mensagens que não se encaixem adequadamente nas categorias anteriores.\n\nEscolha sempre a categoria que melhor representa o assunto principal da mensagem.\n\n## 2. URGÊNCIA\n\nClassifique a urgência em UMA das seguintes opções:\n\n- alta: quando o cliente indica necessidade de solução imediata, menciona prazo muito curto, prejuízo, bloqueio, impossibilidade de utilizar o serviço ou outro impacto relevante.\n- média: quando existe um problema que precisa ser resolvido, mas não há indicação de impacto imediato ou prazo crítico.\n- baixa: dúvidas, solicitações simples, sugestões ou assuntos sem impacto imediato.\n\nNão classifique uma mensagem como alta apenas porque o cliente está insatisfeito. A urgência deve considerar o impacto e o prazo indicado ou razoavelmente inferido da mensagem.\n\n## 3. SENTIMENTO\n\nClassifique o sentimento predominante como:\n\n- positivo: satisfação, elogio, agradecimento ou entusiasmo.\n- neutro: mensagem objetiva, dúvida ou solicitação sem emoção claramente positiva ou negativa.\n- negativo: reclamação, frustração, insatisfação, preocupação ou descontentamento.\n\n## 4. RESUMO\n\nCrie um resumo curto e objetivo da mensagem.\n\nO resumo deve explicar:\n- qual é o problema ou solicitação principal;\n- e, quando relevante, qual é a necessidade indicada pelo cliente.\n\nNão adicione informações que não estejam presentes na mensagem.\n\n## 5. AÇÃO RECOMENDADA\n\nIndique o próximo passo mais adequado para a equipe responsável.\n\nA ação recomendada deve ser uma orientação para a equipe, e NÃO uma afirmação de que uma ação já foi executada.\n\nPor exemplo, em vez de:\n\"Realizar o estorno imediatamente.\"\n\nprefira:\n\"Encaminhar para o setor financeiro para verificar a cobrança duplicada e avaliar o estorno.\"\n\nNão presuma que uma transação, reembolso, estorno, alteração de cadastro ou qualquer outra ação já foi autorizada ou executada.\n\n## 6. REGRAS IMPORTANTES\n\n- Sempre preencha todos os campos solicitados pelo formato de saída.\n- Responda de forma objetiva.\n- Não converse com o cliente.\n- Não escreva explicações fora dos campos estruturados.\n- Não invente informações.\n- Não assuma que uma ação operacional ou financeira já foi autorizada.\n- Quando houver dúvida entre duas categorias, escolha a categoria que melhor representa o assunto principal da mensagem.\n- A urgência deve ser determinada pelo contexto da mensagem, não apenas por palavras como \"urgente\", \"hoje\" ou \"rápido\".\n- A ação recomendada deve ser compatível com as informações disponíveis.\n\nA saída deve seguir exatamente o formato estruturado solicitado pelo Output Parser."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "be2e83d5-4d64-4a86-8a24-0bba9d4cfb3c",
+      "name": "Classificar Atendimento"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"categoria\": \"financeiro\",\n  \"urgencia\": \"alta\",\n  \"sentimento\": \"negativo\",\n  \"resumo\": \"Cliente relata cobrança duplicada e solicita resolução imediata.\",\n  \"acao_recomendada\": \"Encaminhar para o setor financeiro\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        624,
+        208
+      ],
+      "id": "7365cb7d-aa19-42c0-a46c-69fa386fec49",
+      "name": "Estruturar Resultado"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "95fcbd32-0915-4ef4-b6ca-f955c4272f4a",
+              "leftValue": "={{ $json.output.urgencia}}",
+              "rightValue": "alta",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        816,
+        0
+      ],
+      "id": "22eef801-47f8-4617-87a4-94a29491ec9c",
+      "name": "É Urgente?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "77f56f84-4a79-444f-8e94-cc8b8c532e9b",
+              "name": "tipo_alerta",
+              "value": "URGENTE",
+              "type": "string"
+            },
+            {
+              "id": "ad2b3125-b327-460f-8719-6dce631e1d41",
+              "name": "setor",
+              "value": "={{ $json.output.categoria }}",
+              "type": "string"
+            },
+            {
+              "id": "25a07c1c-155b-4876-8775-ee15d126a5fe",
+              "name": "sentimento",
+              "value": "={{ $json.output.sentimento }}",
+              "type": "string"
+            },
+            {
+              "id": "77616293-5be5-4943-8cea-10918624d7bd",
+              "name": "resumo",
+              "value": "={{ $json.output.resumo }}",
+              "type": "string"
+            },
+            {
+              "id": "83a0a943-6dd6-4542-90c9-1d89351ea11b",
+              "name": "acao_recomendada",
+              "value": "={{ $json.output.acao_recomendada }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": "={{ false }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1040,
+        -96
+      ],
+      "id": "c5788839-8881-4585-8fdd-7d2ce42158b9",
+      "name": "Preparar Alerta"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        304,
+        208
+      ],
+      "id": "65677dae-3c47-4f8c-b9e2-ebeb851ef614",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "seu id",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b8a35271-78fa-4735-97be-50241630484d",
+              "name": "tipo_alerta",
+              "value": "NORMAL",
+              "type": "string"
+            },
+            {
+              "id": "f76af7e9-2171-4851-aec7-95d8203365e8",
+              "name": "setor",
+              "value": "={{ $json.output.categoria }}",
+              "type": "string"
+            },
+            {
+              "id": "7271be1d-714f-4e3c-ad7a-fb39f632071e",
+              "name": "sentimento",
+              "value": "={{ $json.output.sentimento }}",
+              "type": "string"
+            },
+            {
+              "id": "b95c571f-380d-4d71-ab2b-fcc5dba6bb04",
+              "name": "resumo",
+              "value": "={{ $json.output.resumo }}",
+              "type": "string"
+            },
+            {
+              "id": "da61777b-beb8-43fd-9db1-cbf506c47d70",
+              "name": "acao_recomendada",
+              "value": "={{ $json.output.acao_recomendada }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1040,
+        96
+      ],
+      "id": "75ea09c2-bbdf-437c-af48-ff1ccf6acf94",
+      "name": "Preparar Registro Normal"
+    },
+    {
+      "parameters": {
+        "sendTo": "equipe@empresa.com",
+        "subject": "=[URGENTE] Atendimento - {{ $json.setor }}",
+        "message": "=<h2>🚨 Atendimento urgente identificado</h2>  <p><strong>Setor:</strong> {{ $json.setor }}</p> <p><strong>Sentimento:</strong> {{ $json.sentimento }}</p>  <p><strong>Resumo:</strong><br> {{ $json.resumo }}</p>  <p><strong>Ação recomendada:</strong><br> {{ $json.acao_recomendada }}</p>  <hr> <p>Alerta gerado automaticamente pelo fluxo de triagem.</p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1488,
+        -96
+      ],
+      "id": "a20eef2e-cce3-4ce4-a251-bbe7d88b6e1b",
+      "name": "Enviar Alerta por E-mail",
+      "webhookId": "f0fd456b-6af7-4eee-a595-848b7c2ad594",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "seu id",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Triagem_Inteligente_de_Clientes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1119933759,
+          "mode": "list",
+          "cachedResultName": "Triagem",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID/edit#gid=1119933759"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "data": "={{ $now }}",
+            "tipo_alerta": "={{ $json.tipo_alerta }}",
+            "setor": "={{ $json.setor }}",
+            "sentimento": "={{ $json.sentimento }}",
+            "resumo": "={{ $json.resumo }}",
+            "acao_recomendada": "={{ $json.acao_recomendada }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tipo_alerta",
+              "displayName": "tipo_alerta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "setor",
+              "displayName": "setor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sentimento",
+              "displayName": "sentimento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resumo",
+              "displayName": "resumo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "acao_recomendada",
+              "displayName": "acao_recomendada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1264,
+        96
+      ],
+      "id": "15f23bd9-0150-4446-8d50-38cc1f9c8e30",
+      "name": "Registrar Atendimento Normal",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "seu id",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Triagem_Inteligente_de_Clientes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1119933759,
+          "mode": "list",
+          "cachedResultName": "Triagem",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID/edit#gid=1119933759"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "data": "={{ $now }}",
+            "tipo_alerta": "={{ $json.tipo_alerta }}",
+            "setor": "={{ $json.setor }}",
+            "sentimento": "={{ $json.sentimento }}",
+            "resumo": "={{ $json.resumo }}",
+            "acao_recomendada": "={{ $json.acao_recomendada }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tipo_alerta",
+              "displayName": "tipo_alerta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "setor",
+              "displayName": "setor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sentimento",
+              "displayName": "sentimento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resumo",
+              "displayName": "resumo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "acao_recomendada",
+              "displayName": "acao_recomendada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1264,
+        -96
+      ],
+      "id": "45586db4-4873-4da8-a494-09642e3d1a3e",
+      "name": "Registrar Atendimento Urgente",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "seu id",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Receber Atendimento": {
+      "main": [
+        [
+          {
+            "node": "Extrair Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Mensagem": {
+      "main": [
+        [
+          {
+            "node": "Classificar Atendimento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classificar Atendimento": {
+      "main": [
+        [
+          {
+            "node": "É Urgente?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estruturar Resultado": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Classificar Atendimento",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É Urgente?": {
+      "main": [
+        [
+          {
+            "node": "Preparar Alerta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar Registro Normal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Alerta": {
+      "main": [
+        [
+          {
+            "node": "Registrar Atendimento Urgente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Classificar Atendimento",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Registro Normal": {
+      "main": [
+        [
+          {
+            "node": "Registrar Atendimento Normal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar Atendimento Urgente": {
+      "main": [
+        [
+          {
+            "node": "Enviar Alerta por E-mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "a79e42d7-3176-4d0f-9653-a57e4f683ef7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": ""
+  },
+  "nodeGroups": [],
+  "id": "QNYhvsYFYv97smGX",
+  "tags": []
+}
